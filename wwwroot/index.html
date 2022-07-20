@@ -6,18 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>좋은 습관</title>
     <!--For publish github pages-->
-    <!--<base href="/GoodHabits/" />-->
+    <base href="/GoodHabits/" />
     <!--For develop-->
-    <base href="/" />
+    <!--<base href="/" />-->
 
-    <link href="css/app.css" rel="stylesheet" />
-    <link href="manifest.json" rel="manifest" />
+    <link href="GoodHabits/css/app.css" rel="stylesheet" />
+    <link href="GoodHabits/manifest.json" rel="manifest" />
+    <!--<link href="css/app.css" rel="stylesheet" />
+    <link href="manifest.json" rel="manifest" />-->
 
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
-    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+    <link href="GoodHabits/_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+    <!--<link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />-->
 
-    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
-
+    <script src="GoodHabits/_content/MudBlazor/MudBlazor.min.js"></script>
+    <!--<script src="content/MudBlazor/MudBlazor.min.js"></script>-->
     <!-- Start Single Page Apps for GitHub Pages -->
     <script type="text/javascript">
         // Single Page Apps for GitHub Pages
@@ -56,12 +59,16 @@
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
-        <a href="" class="reload">Reload</a>
+        <a href="GoodHabits/" class="reload">Reload</a>
+        <!--<a href="" class="reload">Reload</a>-->
         <a class="dismiss">🗙</a>
     </div>
-    <script src="decode.js"></script>
-    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
-    <script>navigator.serviceWorker.register('service-worker.js');</script>
+    <!--<script src="decode.js"></script>-->
+    <script src="GoodHabits/decode.js"></script>
+    <script src="GoodHabits/_framework/blazor.webassembly.js" autostart="false"></script>
+    <!--<script src="_framework/blazor.webassembly.js" autostart="false"></script>-->
+    <script>navigator.serviceWorker.register('GoodHabits/service-worker.js');</script>
+    <!--<script>navigator.serviceWorker.register('service-worker.js');</script>-->
     <script>
         Blazor.start({
             loadBootResource: function (type, name, defaultUri, integrity) {
