@@ -1,18 +1,23 @@
-name: DeployToGitHubPages
-env:
-  PUBLISH_DIR: bin/Release/net6.0/publish/wwwroot
+name: .NET
 
-# Controls when the action will run
 on:
   push:
-    branches: [ master ]
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
 
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+   
     - name: Publish app
       run: dotnet publish -c Release
 
