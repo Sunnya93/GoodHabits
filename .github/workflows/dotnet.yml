@@ -20,7 +20,7 @@ jobs:
       run: dotnet workload install wasm-tools --skip-manifest-update
 
     - name : Restore workload
-      run : dotnet workload restore
+      run : dotnet workload restore --skip-manifest-update
     
     - name: Publish app
       run: dotnet publish -c Release
