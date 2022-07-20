@@ -17,7 +17,9 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Publish app
-      run: dotnet publish -c Release
+      run: dotnet workload install wasm-tools
+           dotnet workload restore
+           dotnet publish -c Release
 
     - name: Rewrite base href
       uses: SteveSandersonMS/ghaction-rewrite-base-href@v1
