@@ -1,0 +1,44 @@
+﻿@if(Pray is not null && MudDialog is not null)
+{
+    
+    <MudDialog>
+        <TitleContent>
+            <MudText Typo="Typo.h6">
+               @MudDialog.Title                
+            </MudText>
+        </TitleContent>
+         <DialogContent>
+            <MudSelect @bind-Value="@Pray.Type" T="PrayType" Label="기도 종류" AnchorOrigin="Origin.BottomCenter" Variant="Variant.Outlined">
+                <MudSelectItem T="PrayType" Value="@(PrayType.Praise)">찬양</MudSelectItem>
+                <MudSelectItem T="PrayType" Value="@(PrayType.Thanksgiving)">감사</MudSelectItem>
+                <MudSelectItem T="PrayType" Value="@(PrayType.Supplication)">간구</MudSelectItem>
+                <MudSelectItem T="PrayType" Value="@(PrayType.Petition)">청원</MudSelectItem>
+            </MudSelect>
+            <MudTextField T="string" Label="Content" Variant="Variant.Outlined" Lines="10" RequiredError="기도 내용을 입력하세요!" @bind-Value=@Pray.Content/>
+            <MudTextField T="DateTime" Format="yyyy-MM-dd" Variant="Variant.Outlined" Label="일자" InputType="InputType.Date" @bind-Value=@Pray.PrayDate/>
+         </DialogContent>
+          <DialogActions>
+            <MudButton OnClick="Cancel">Cancel</MudButton>
+            <MudButton Color="Color.Primary" OnClick="Save">Save</MudButton>
+        </DialogActions>
+    </MudDialog>
+    
+}
+
+
+@code {
+    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+
+    [Parameter]
+    public PrayModel Pray { get; set; } = new PrayModel();
+
+    private void Cancel()
+    {
+        MudDialog!.Cancel();
+    }
+
+    private void Save()
+    {
+        MudDialog!.Close(DialogResult.Ok(Pray.Id));
+    }
+}

@@ -1,0 +1,37 @@
+﻿@if(Todo is not null && MudDialog is not null)
+{
+    <MudDialog>
+        <TitleContent>
+            <MudText Typo="Typo.h6">
+               @MudDialog.Title                
+            </MudText>
+        </TitleContent>
+         <DialogContent>
+            <MudTextField T="string" Label="Title" Variant="Variant.Outlined" Required Lines="3" RequiredError="할일을 입력하세요!" @bind-Value=@Todo.Title/>
+            <MudTextField T="string" Label="Content" Variant="Variant.Outlined" Required Lines="10" RequiredError="할일 상세 내용을 입력하세요!" @bind-Value=@Todo.Content/>
+            <MudTextField T="DateTime" Format="yyyy-MM-dd" Variant="Variant.Outlined" Label="일자" InputType="InputType.Date" @bind-Value=@Todo.TodoDate/>
+         </DialogContent>
+          <DialogActions>
+            <MudButton OnClick="Cancel">Cancel</MudButton>
+            <MudButton Color="Color.Primary" OnClick="Save">Save</MudButton>
+        </DialogActions>
+    </MudDialog>
+    
+}
+
+@code {
+    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+
+    [Parameter]
+    public TodoModel Todo { get; set; } = new TodoModel();
+
+    private void Cancel()
+    {
+        MudDialog!.Cancel();
+    }
+
+    private void Save()
+    {
+        MudDialog!.Close(DialogResult.Ok(Todo.Id));
+    }
+}

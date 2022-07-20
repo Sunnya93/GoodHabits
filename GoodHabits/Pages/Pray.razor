@@ -1,0 +1,106 @@
+﻿@page "/pray"
+@inject PrayService _service
+@inject IDialogService Dialog
+@inject ISnackbar Snackbar
+
+<h1 class="mt-5 mb-5">기도 노트</h1>
+<div class="d-flex flex-row-reverse">
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => SaveClick(new PrayModel(){ Id = 0, PrayDate = DateTime.Today, InsertTime = DateTime.Now, UpdateTime = DateTime.Now }))">신규</MudButton>
+</div>
+
+<MudChipSet @bind-SelectedChips=@Chips MultiSelection="true" Filter="filter">
+    @foreach(PrayModel pray in Prays.GroupBy(i => i.PrayDate.Date).Select(lst => new PrayModel { PrayDate = lst.Key }).ToList())
+    {
+        <MudChip Text="@pray.PrayDate.ToString("yyyy-MM-dd")" Default=@(pray.PrayDate.Date == DateTime.Today.Date ? true : false) Variant="Variant.Text" Color="Color.Default" SelectedColor="Color.Primary" Size="Size.Large"></MudChip>
+    }
+</MudChipSet>
+
+@if(Chips is not null && Chips.Length > 0)
+{
+    @foreach(string chipdate in Chips.Select(chip => chip.Text))
+    {
+        @foreach(PrayModel pray in Prays.Where(i => i.PrayDate.Date == Convert.ToDateTime(chipdate).Date).OrderBy(i => i.Type).ToList())
+        {
+            <MudCard Class="mb-5">
+                <MudCardContent>
+                    <MudText>@pray.Type</MudText>
+                    <MudText Typo="Typo.body2">@pray.Content</MudText>
+                    <MudText Typo="Typo.caption">@pray.PrayDate.ToString("yyyy-MM-dd")</MudText>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@((e) => SaveClick(pray))">수정</MudButton>
+                    <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="@((e) => DeleteClick(pray))">삭제</MudButton>
+                </MudCardActions>
+            </MudCard>
+        }
+    }
+   
+}
+
+
+@code {
+    MudChip[]? Chips;
+    List<PrayModel> Prays = new List<PrayModel>();
+    DialogOptions closeButton = new DialogOptions() { CloseButton = true };
+    bool filter = true;
+    protected override async void OnInitialized()
+    {
+        Prays = await _service.GetAll();
+
+        StateHasChanged();
+    }
+
+    private async Task SaveClick(PrayModel newitem)
+    {
+        try
+        {
+            bool IsNew = false;
+            if(newitem.Id == 0) IsNew = true;
+
+            var paramters = new DialogParameters { ["Pray"] = newitem };
+            var dialog = Dialog.Show<PrayEdit>(IsNew ? "신규" : "수정", paramters);
+            var result = await dialog.Result;
+
+            if (!result.Cancelled)
+            {
+                var SaveModels = (IsNew ? await _service.AddAsync(newitem) : await _service.UpdateAsync(newitem));
+                Snackbar.Add("Save Successfully", Severity.Success);
+
+                Prays = await _service.GetAll();
+            }
+        }
+        catch(Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task DeleteClick(PrayModel item)
+    {
+        try
+        {
+            var parameters = new DialogParameters();
+            parameters.Add("ContentText", "정말로 삭제하시겠습니까? 데이터는 복원할 수 없습니다.");
+            parameters.Add("ButtonText", "Delete");
+            parameters.Add("Color", Color.Error);
+
+            var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+            var dialog = Dialog.Show<DialogTemplate>("Delete", parameters, options);
+            var result = await dialog.Result;
+
+            if (!result.Cancelled)
+            {
+                await _service.DeleteAsync(item);
+                Snackbar.Add("Save Successfully", Severity.Success);
+
+                Prays = await _service.GetAll();
+            }
+        }
+        catch(Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+}
