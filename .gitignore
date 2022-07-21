@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /wwwroot/index.deploy.html
 /wwwroot/index.Development.html
+/Properties/ServiceDependencies/sqlitewasmtest - Web Deploy
+/Properties/ServiceDependencies/testsqlite - Web Deploy/profile.arm.json
