@@ -1,3 +1,4 @@
+using SqliteWasmHelper;
 using GoodHabits;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
