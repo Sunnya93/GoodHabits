@@ -6,7 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
 	<WasmBuildNative>true</WasmBuildNative>
     <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
-	<RunAOTCompilation>true</RunAOTCompilation>
   </PropertyGroup>
 
   <ItemGroup>
