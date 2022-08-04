@@ -2,12 +2,13 @@
 @inject TodoService _service
 @inject IDialogService Dialog
 @inject ISnackbar Snackbar
+@inject IndexedDBManager DbManager
 
 <h1 class="mt-5 mb-5">Today's Schedule</h1>
 <h2 class="mt-5 mb-5">오늘은 @(DateTime.Today.ToString("yyyy년 MM월 dd일")) @(DateTime.Today.DayOfWeek) 입니다.</h2>
 
 <div class="d-flex flex-row-reverse">
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => SaveClick(new TodoModel(){ Id = 0, TodoDate = DateTime.Today, InsertTime = DateTime.Now, UpdateTime = DateTime.Now }))">신규</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => SaveClick(null))">신규</MudButton>
 </div>
 
 @foreach(TodoModel todo in Todos.Where(i => i.TodoDate.Date == DateTime.Today.Date).OrderBy(i => i.TodoDate).ToList())
@@ -18,31 +19,42 @@
             <MudText Typo="Typo.body2">@todo.Content</MudText>
         </MudCardContent>
         <MudCardActions>
-            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@((e) => SaveClick(todo))">수정</MudButton>
-            <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="@((e) => DeleteClick(todo))">삭제</MudButton>
+            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => SaveClick(todo))">수정</MudButton>
+            <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="@(() => DeleteClick(todo))">삭제</MudButton>
         </MudCardActions>
     </MudCard>
 }
 
 @code {
-
     List<TodoModel> Todos = new List<TodoModel>();
     DialogOptions closeButton = new DialogOptions() { CloseButton = true };
 
     protected override async void OnInitialized()
     {
-        Todos = await _service.GetAll();
-
+        await GetAllData();
         StateHasChanged();
     }
 
+    private async Task GetAllData()
+    {
+        Todos = await DbManager.GetRecords<TodoModel>("Todo");
+    }
 
-    private async Task SaveClick(TodoModel newitem)
+    private void OnIndexedDbNotification(object sender, IndexedDBNotificationArgs args)
+    {
+        Snackbar.Add(args.Message, Severity.Warning);
+    }
+
+    private async Task SaveClick(TodoModel? newitem)
     {
         try
         {
             bool IsNew = false;
-            if(newitem.Id == 0) IsNew = true;
+            if (newitem is null)
+            {
+                IsNew = true; 
+                newitem = new TodoModel(){ TodoDate = DateTime.Now };
+            }
 
             var paramters = new DialogParameters { ["Todo"] = newitem };
             var dialog = Dialog.Show<TodayEdit>(IsNew ? "신규" : "수정", paramters);
@@ -50,10 +62,24 @@
 
             if (!result.Cancelled)
             {
-                var SaveModels = (IsNew ? await _service.AddAsync(newitem) : await _service.UpdateAsync(newitem));
-                Snackbar.Add("Save Successfully", Severity.Success);
+                var newRecord = new StoreRecord<TodoModel>
+                {
+                    Storename = "Todo",
+                    Data = (TodoModel)result.Data
+                };
 
-                Todos = await _service.GetAll();
+                if (IsNew)
+                {
+                    await DbManager.AddRecord<TodoModel>(newRecord);
+                }
+                else
+                {
+                    await DbManager.UpdateRecord<TodoModel>(newRecord);   
+                }
+
+                Snackbar.Add("Save Successfully", Severity.Success);
+                
+                await GetAllData();
             }
         }
         catch(Exception ex)
@@ -62,7 +88,7 @@
         }
     }
 
-     private async Task DeleteClick(TodoModel item)
+    private async Task DeleteClick(TodoModel item)
     {
         try
         {
@@ -78,10 +104,9 @@
 
             if (!result.Cancelled)
             {
-                await _service.DeleteAsync(item);
+                await DbManager.DeleteRecord("Todo", item.Id);
                 Snackbar.Add("Save Successfully", Severity.Success);
-
-                Todos = await _service.GetAll();
+                await GetAllData();
             }
         }
         catch(Exception ex)

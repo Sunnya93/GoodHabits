@@ -32,6 +32,8 @@
 
     private void Save()
     {
-        MudDialog!.Close(DialogResult.Ok(Todo.Id));
+        Todo.InsertTime = DateTime.Now;
+        Todo.UpdateTime = DateTime.Now;
+        MudDialog!.Close(DialogResult.Ok(Todo));
     }
 }

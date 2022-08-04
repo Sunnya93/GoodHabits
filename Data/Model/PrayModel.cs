@@ -4,7 +4,7 @@
 
     public class PrayModel
     {
-        public int Id { get; set; }
+        public long? Id { get; set; }
         public PrayType Type { get; set; }
         public string? Content { get; set; }
         public DateTime PrayDate { get; set; }
