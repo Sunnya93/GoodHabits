@@ -2,10 +2,11 @@
 @inject PrayService _service
 @inject IDialogService Dialog
 @inject ISnackbar Snackbar
+@inject IndexedDBManager DbManager
 
 <h1 class="mt-5 mb-5">기도 노트</h1>
 <div class="d-flex flex-row-reverse">
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => SaveClick(new PrayModel(){ Id = 0, PrayDate = DateTime.Today, InsertTime = DateTime.Now, UpdateTime = DateTime.Now }))">신규</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => SaveClick(null))">신규</MudButton>
 </div>
 
 <MudChipSet @bind-SelectedChips=@Chips MultiSelection="true" Filter="filter">
@@ -45,17 +46,25 @@
     bool filter = true;
     protected override async void OnInitialized()
     {
-        Prays = await _service.GetAll();
-
+        await GetAllData();
         StateHasChanged();
     }
+        
+    private async Task GetAllData()
+    {
+        Prays = await DbManager.GetRecords<PrayModel>("Pray");
+    }
 
-    private async Task SaveClick(PrayModel newitem)
+    private async Task SaveClick(PrayModel? newitem)
     {
         try
         {
             bool IsNew = false;
-            if(newitem.Id == 0) IsNew = true;
+            if (newitem is null)
+            {
+                IsNew = true; 
+                newitem = new PrayModel(){ PrayDate = DateTime.Now };
+            }
 
             var paramters = new DialogParameters { ["Pray"] = newitem };
             var dialog = Dialog.Show<PrayEdit>(IsNew ? "신규" : "수정", paramters);
@@ -63,10 +72,23 @@
 
             if (!result.Cancelled)
             {
-                var SaveModels = (IsNew ? await _service.AddAsync(newitem) : await _service.UpdateAsync(newitem));
-                Snackbar.Add("Save Successfully", Severity.Success);
+                var newRecord = new StoreRecord<PrayModel>
+                {
+                    Storename ="Pray",
+                    Data = (PrayModel)result.Data
+                };
 
-                Prays = await _service.GetAll();
+                if (IsNew)
+                {
+                    await DbManager.AddRecord<PrayModel>(newRecord);
+                }
+                else
+                {
+                    await DbManager.UpdateRecord<PrayModel>(newRecord);   
+                }
+
+                Snackbar.Add("Save Successfully", Severity.Success);
+                await GetAllData();
             }
         }
         catch(Exception ex)
@@ -91,10 +113,9 @@
 
             if (!result.Cancelled)
             {
-                await _service.DeleteAsync(item);
+                await DbManager.DeleteRecord("Pray", item.Id);
                 Snackbar.Add("Save Successfully", Severity.Success);
-
-                Prays = await _service.GetAll();
+                await GetAllData();
             }
         }
         catch(Exception ex)

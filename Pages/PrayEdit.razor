@@ -39,6 +39,8 @@
 
     private void Save()
     {
-        MudDialog!.Close(DialogResult.Ok(Pray.Id));
+        Pray.InsertTime = DateTime.Now;
+        Pray.UpdateTime = DateTime.Now;
+        MudDialog!.Close(DialogResult.Ok(Pray));
     }
 }
